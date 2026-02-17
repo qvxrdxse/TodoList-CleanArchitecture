@@ -1,24 +1,50 @@
-using TodoList.Application.Services;
+using Microsoft.EntityFrameworkCore;
 using TodoList.Application.Interfaces;
+using TodoList.Application.Services;
+using TodoList.Infrastructure.Data;
 using TodoList.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Добавляем контроллеры
+// ----------------------
+// Add services
+// ----------------------
+
 builder.Services.AddControllers();
 
-// Регистрируем зависимости
-// Services.AddScoped<ITodoRepository, InMemoryTodoRepository>();
-builder.Services.AddSingleton<ITodoRepository, InMemoryTodoRepository>();
-builder.Services.AddScoped<TodoService>();
-
-// Swagger (удобно для теста API)
+// Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// DbContext
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Repository
+builder.Services.AddScoped<ITodoRepository, EfTodoRepository>();
+
+// Application services
+builder.Services.AddScoped<TodoService>();
+
+// CORS (на будущее для React)
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend",
+        policy =>
+        {
+            policy.AllowAnyOrigin()
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+});
+
 var app = builder.Build();
 
-// Включаем Swagger
+// ----------------------
+// Middleware pipeline
+// ----------------------
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -26,6 +52,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowFrontend");
 
 app.UseAuthorization();
 
