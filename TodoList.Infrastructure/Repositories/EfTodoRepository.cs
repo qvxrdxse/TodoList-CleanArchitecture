@@ -19,6 +19,15 @@ public class EfTodoRepository : ITodoRepository
         await _context.Todos.AddAsync(todo);
     }
 
+    public async Task DeleteAsync(Guid id)
+    {
+        var entity = await _context.Todos.FindAsync(id);
+        if (entity == null)
+            return;
+
+        _context.Todos.Remove(entity);
+    }
+
     public async Task<List<TodoItem>> GetAllAsync()
     {
         return await _context.Todos.ToListAsync();

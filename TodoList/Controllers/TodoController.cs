@@ -25,7 +25,14 @@ public class TodoController : ControllerBase
         return Ok();
     }
 
-    [HttpPost("{id}/complete")]
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        await _service.DeleteAsync(id);
+        return NoContent();
+    }
+
+    [HttpPatch("{id}/complete")]
     public async Task<IActionResult> Complete(Guid id)
     {
         await _service.CompleteAsync(id);

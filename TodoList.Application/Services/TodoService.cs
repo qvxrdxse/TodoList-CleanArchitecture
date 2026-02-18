@@ -22,6 +22,16 @@ public class TodoService
         await _repository.SaveChangesAsync();
     }
 
+    public async Task DeleteAsync(Guid id)
+    {
+        var todo = await _repository.GetByIdAsync(id);
+        if (todo == null)
+            throw new Exception("Todo not found");
+
+        await _repository.DeleteAsync(id);
+        await _repository.SaveChangesAsync();
+    }
+
     public async Task CompleteAsync(Guid id)
     {
         var todo = await _repository.GetByIdAsync(id);

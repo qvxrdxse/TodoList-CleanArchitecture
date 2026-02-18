@@ -21,4 +21,9 @@ public class InMemoryTodoRepository : ITodoRepository
 
     public Task SaveChangesAsync()
         => Task.CompletedTask;
+
+    public Task DeleteAsync(Guid id)
+    {
+        throw new NotImplementedException();
+    }
 }
