@@ -4,6 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>9c535308-06f0-480d-8d03-63f16f60c4e3</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,6 +22,10 @@
 
   <ItemGroup>
     <Folder Include="Middleware\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="TodoList.API.csproj.user" />
   </ItemGroup>
 
 </Project>
