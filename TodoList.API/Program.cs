@@ -17,9 +17,17 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // DbContext
+var dbPassword = builder.Configuration["DB_PASSWORD"];
+var dbServer = builder.Configuration["DB_SERVER"];
+var dbName = builder.Configuration["DB_NAME"];
+
+var connectionStringTemplate = builder.Configuration.GetConnectionString("DefaultConnection");
+var connectionString = connectionStringTemplate
+    .Replace("{DB_PASSWORD}", dbPassword)
+    .Replace("{DB_SERVER}", dbServer)
+    .Replace("{DB_NAME}", dbName);
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(connectionString));
 
 // Repository
 builder.Services.AddScoped<ITodoRepository, EfTodoRepository>();
@@ -41,15 +49,21 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate(); // создаст базу и таблицы, если их нет
+}
+
 // ----------------------
 // Middleware pipeline
 // ----------------------
 
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Todo API V1");
+});
 
 app.UseHttpsRedirection();
 
