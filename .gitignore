@@ -18,9 +18,6 @@ obj/
 .nuget/
 packages/
 
-# EF Migrations
-Migrations/
-
 # Others
 *.db
 .env

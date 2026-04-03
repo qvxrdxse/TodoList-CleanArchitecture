@@ -3,6 +3,9 @@ using TodoList.Application.Interfaces;
 using TodoList.Application.Services;
 using TodoList.Infrastructure.Data;
 using TodoList.Infrastructure.Repositories;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using TodoList.Application.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +14,10 @@ var builder = WebApplication.CreateBuilder(args);
 // ----------------------
 
 builder.Services.AddControllers();
+
+// Validation
+builder.Services.AddFluentValidationAutoValidation(); 
+builder.Services.AddValidatorsFromAssemblyContaining<CreateTodoDtoValidator>();
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
@@ -51,10 +58,39 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate(); // создаст базу и таблицы, если их нет
-}
+    var services = scope.ServiceProvider;
+    var logger = services.GetRequiredService<ILogger<Program>>();
+    var context = services.GetRequiredService<AppDbContext>(); // Твой класс контекста
 
+    int retries = 10; // Сколько раз пробуем
+    int delay = 2000; // Пауза между попытками (2 сек)
+
+    for (int i = 0; i < retries; i++)
+    {
+        try
+        {
+            logger.LogInformation("Попытка {Step} из {Total}: подключаемся к БД...", i + 1, retries);
+
+            // Пытаемся накатить миграции
+            context.Database.Migrate();
+
+            logger.LogInformation("База данных готова! Таблицы созданы.");
+            break; // Если всё ок — выходим из цикла
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning("БД еще не готова. Ждем {Delay}ms... (Ошибка: {Message})", delay, ex.Message);
+
+            if (i == retries - 1) // Если это была последняя попытка
+            {
+                logger.LogCritical("Не удалось подключиться к БД после {Total} попыток. Всё, приехали.", retries);
+                throw; // Вылетаем с ошибкой
+            }
+
+            Thread.Sleep(delay); // Ждем и идем на следующий круг
+        }
+    }
+}
 // ----------------------
 // Middleware pipeline
 // ----------------------
