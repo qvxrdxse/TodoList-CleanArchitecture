@@ -1,4 +1,5 @@
-﻿using TodoList.Domain.Entities;
+﻿using TodoList.Application.DTOs;
+using TodoList.Domain.Entities;
 
 namespace TodoList.Application.Interfaces;
 

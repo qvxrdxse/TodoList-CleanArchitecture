@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using TodoList.Application.DTOs;
 using TodoList.Application.Services;
 
 namespace TodoList.API.Controllers;
@@ -19,9 +20,9 @@ public class TodoController : ControllerBase
         => Ok(await _service.GetAllAsync());
 
     [HttpPost]
-    public async Task<IActionResult> Create(string title)
+    public async Task<IActionResult> Create(CreateTodoDto dto)
     {
-        await _service.CreateAsync(title);
+        await _service.CreateAsync(dto);
         return Ok();
     }
 

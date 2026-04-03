@@ -1,4 +1,5 @@
-﻿using TodoList.Application.Interfaces;
+﻿using TodoList.Application.DTOs;
+using TodoList.Application.Interfaces;
 using TodoList.Domain.Entities;
 
 namespace TodoList.Application.Services;
@@ -12,16 +13,25 @@ public class TodoService
         _repository = repository;
     }
 
-    public async Task<List<TodoItem>> GetAllAsync()
-        => await _repository.GetAllAsync();
-
-    public async Task CreateAsync(string title)
+    public async Task<List<TodoResponseDto>> GetAllAsync()
     {
-        var todo = new TodoItem(title);
+        var todos = await _repository.GetAllAsync();
+
+        return todos.Select(todo => new TodoResponseDto
+        {
+            Id = todo.Id,
+            Title = todo.Title,
+            IsCompleted = todo.IsCompleted
+        }).ToList();
+    }
+
+    public async Task CreateAsync(CreateTodoDto dto)
+    {
+        var todo = new TodoItem(dto.Title);
+
         await _repository.AddAsync(todo);
         await _repository.SaveChangesAsync();
     }
-
     public async Task DeleteAsync(Guid id)
     {
         var todo = await _repository.GetByIdAsync(id);
