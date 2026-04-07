@@ -1,4 +1,5 @@
 ﻿using TodoList.Application.DTOs;
+using TodoList.Application.Exceptions;
 using TodoList.Application.Interfaces;
 using TodoList.Domain.Entities;
 
@@ -36,7 +37,7 @@ public class TodoService
     {
         var todo = await _repository.GetByIdAsync(id);
         if (todo == null)
-            throw new Exception("Todo not found");
+            throw new NotFoundException("Todo not found");
 
         await _repository.DeleteAsync(id);
         await _repository.SaveChangesAsync();
@@ -46,7 +47,7 @@ public class TodoService
     {
         var todo = await _repository.GetByIdAsync(id);
         if (todo == null)
-            throw new Exception("Todo not found");
+            throw new NotFoundException("Todo not found");
 
         todo.Complete();
         await _repository.SaveChangesAsync();

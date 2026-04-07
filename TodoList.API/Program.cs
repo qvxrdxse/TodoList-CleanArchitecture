@@ -6,6 +6,7 @@ using TodoList.Infrastructure.Repositories;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using TodoList.Application.Validators;
+using TodoList.API.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -54,7 +55,15 @@ builder.Services.AddCors(options =>
         });
 });
 
+
+// ----------------------
+// Middleware pipeline
+// ----------------------
+
+
 var app = builder.Build();
+
+app.UseMiddleware<ExceptionMiddleware>();
 
 using (var scope = app.Services.CreateScope())
 {
@@ -91,9 +100,6 @@ using (var scope = app.Services.CreateScope())
         }
     }
 }
-// ----------------------
-// Middleware pipeline
-// ----------------------
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>
